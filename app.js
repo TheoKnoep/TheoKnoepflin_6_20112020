@@ -1,8 +1,10 @@
 const express = require('express'); //on importe express
 const bodyParser = require('body-parser'); 
 const mongoose = require('mongoose'); 
+const path = require('path'); 
 
 const userRoutes = require('./routes/user'); 
+const saucesRoutes = require('./routes/sauces'); 
 
 mongoose.connect('mongodb+srv://first_user_4991:jzS5wAP001nDXO52@coursocgofullstack.3ppnx.mongodb.net/sopekocko?retryWrites=true&w=majority',
 	{ useNewUrlParser: true, useUnifiedTopology: true })
@@ -22,6 +24,9 @@ app.use((req, res, next) => { //Déclaration des headers CORS
 
 app.use(bodyParser.json());
 
+app.use('/images', express.static(path.join(__dirname, 'images'))); 
+
 app.use('/api/auth', userRoutes); 
+app.use('/api/sauces', saucesRoutes); 
 
 module.exports = app; 
