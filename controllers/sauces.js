@@ -15,7 +15,7 @@ exports.getOneSauce = (req, res, next) => {
 
 exports.createOneSauce = (req, res, next) => {
 	console.log(req.body); //pourquoi ne s'affiche pas dans la console ?
-	const sauceObject = JSON.parse(req.body.sauce); 
+	const sauceObject = JSON.parse(req.body.sauce); //pourquoi req.body.sauce ?
 	delete sauceObject._id; 
 	const sauce = new Sauce ({ 
 		userId: sauceObject.userId, 
@@ -62,6 +62,7 @@ exports.deleteOneSauce = (req, res, next) => {
 exports.speakUpOneSauce = (req, res, next) => {
 	Sauce.findOne({ _id: req.params.id })
 		.then(sauce => {
+			console.log(sauce); 
 			const userID = req.body.userId; 
 			switch (req.body.like) {
 				case 1: 
@@ -70,7 +71,7 @@ exports.speakUpOneSauce = (req, res, next) => {
 						sauce.likes ++ ;
 						sauce.save()
 							.then(() => res.status(200).json({ message: `L'utilisateur ${userID} a liké la sauce`}))
-							.catch( error => res.status(400).json({ error })); 
+							.catch( error => res.status(400).json({ message: 'cas 1', error: error  })); 
 					} else {/*L'utilisateur a déjà liké la sauce*/}; 
 					break; 
 				case -1: 
@@ -79,7 +80,7 @@ exports.speakUpOneSauce = (req, res, next) => {
 						sauce.dislikes ++; 
 						sauce.save()
 							.then(() => res.status(200).json({ message: `L'utilisateur ${userID} a disliké la sauce`}))
-							.catch( error => res.status(400).json({ error })); 
+							.catch( error => res.status(400).json({ message: 'cas 2', error: error  })); 
 					} else {/* L'utilisateur a déjà disliké la sauce */}
 					break; 
 				case 0: 
@@ -111,5 +112,5 @@ exports.speakUpOneSauce = (req, res, next) => {
 					console.log(`Erreur`); 
 			}; 
 		})
-		.catch( error => res.status(400).json({ error })); 
+		.catch( error => res.status(400).json({ message: 'cas 3', error: error })); 
 }; 
