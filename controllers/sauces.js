@@ -11,11 +11,10 @@ exports.getOneSauce = (req, res, next) => {
 	Sauce.findOne({ _id: req.params.id })
 		.then((sauce) => res.status(200).json(sauce))
 		.catch( error => res.status(400).json({ error })); 
-}; 
+};  
 
 exports.createOneSauce = (req, res, next) => {
-	console.log(req.body); //pourquoi ne s'affiche pas dans la console ?
-	const sauceObject = JSON.parse(req.body.sauce); //pourquoi req.body.sauce ?
+	const sauceObject = JSON.parse(req.body.sauce); 
 	delete sauceObject._id; 
 	const sauce = new Sauce ({ 
 		userId: sauceObject.userId, 
@@ -62,55 +61,44 @@ exports.deleteOneSauce = (req, res, next) => {
 exports.speakUpOneSauce = (req, res, next) => {
 	Sauce.findOne({ _id: req.params.id })
 		.then(sauce => {
-			console.log(sauce); 
-			const userID = req.body.userId; 
+			let newLikesSum = sauce.likes; 
+			let newUsersLikes = [...sauce.usersLiked];
+			let newDislikesSum = sauce.dislikes;
+			let newUsersDislikes = [...sauce.usersDisliked];
+			let indexLike = sauce.usersLiked.indexOf(req.body.userId); 
+			let indexDislike = sauce.usersDisliked.indexOf(req.body.userId); 
 			switch (req.body.like) {
-				case 1: 
-					if (sauce.usersLiked.indexOf(userID) = -1) { 
-						sauce.usersLiked.push(userID); 
-						sauce.likes ++ ;
-						sauce.save()
-							.then(() => res.status(200).json({ message: `L'utilisateur ${userID} a liké la sauce`}))
-							.catch( error => res.status(400).json({ message: 'cas 1', error: error  })); 
-					} else {/*L'utilisateur a déjà liké la sauce*/}; 
-					break; 
-				case -1: 
-					if (sauce.usersDisliked.indexOf(userID) = -1) {
-						sauce.usersDisliked.push(userID); 
-						sauce.dislikes ++; 
-						sauce.save()
-							.then(() => res.status(200).json({ message: `L'utilisateur ${userID} a disliké la sauce`}))
-							.catch( error => res.status(400).json({ message: 'cas 2', error: error  })); 
-					} else {/* L'utilisateur a déjà disliké la sauce */}
-					break; 
-				case 0: 
-					let stateLikeOrDislike = ''; 
-					if (sauce.usersLiked.indexOf(userID) = -1) {
-						stateLikeOrDislike = 'disliked'; 
+				case 1 : 
+					if (indexLike === -1 ) {
+						newLikesSum += 1 ; 
+						newUsersLikes.push(req.body.userId); 
 					} else {
-						stateLikeOrDislike = 'liked'; 
-					}; 
-					if (stateLikeOrDislike = 'liked') { //cas où on doit annuler le like
-						sauce.likes --; 
-						let indexOdUserToDelete = sauce.usersLiked.indexOf(userID); 
-						sauce.usersLiked.splice(indexOdUserToDelete, 1); 
-						sauce.save()
-							.then(() => res.status(200).json({ message: `L'utilisateur ${userID} a annulé son like`}))
-							.catch( error => res.status(400).json({ error })); 
-					} else { //cas où on doit annuler le dislike
-						sauce.dislikes -- ; 
-						let indexOdUserToDelete = sauce.usersDisliked.indexOf(userID); 
-						sauce.usersDisliked.splice(indexOdUserToDelete, 1); 
-						sauce.save()
-							.then(() => res.status(200).json({ message: `L'utilisateur ${userID} a annulé son dislike`}))
-							.catch( error => res.status(400).json({ error }));
+						return res.status(501).json({message: "une erreur est survenue"});
 					}
-
-
 					break; 
-				default: 
-					console.log(`Erreur`); 
-			}; 
+				case -1 : 
+					if (indexDislike === -1 ) {
+						newDislikesSum += 1 ; 
+						newUsersDislikes.push(req.body.userId); 
+					} else {
+						return res.status(502).json({message: "une erreur est survenue"});
+					}	
+					break
+				case 0 : 
+					if (indexLike != -1 ) { //CAS user a liké la sauce 
+						newLikesSum -= 1 ; 
+						newUsersLikes.splice(indexLike, 1); 
+					} else if (indexDislike != -1) { //CAS user a disliké la sauce
+						newDislikesSum -= 1 ; 
+						newUsersDislikes.splice(indexDislike, 1); 
+					} else {
+						return res.status(503).json({message: "une erreur est survenue"});
+					}
+					break; 
+			 }
+			 Sauce.updateOne({ _id: req.params.id }, { likes: newLikesSum, usersLiked: newUsersLikes, dislikes: newDislikesSum, usersDisliked: newUsersDislikes })
+					.then( () => res.status(200).json({message: `L'utilisateur ${req.body.userId} a mis à jour ses préférences de sauces` }))
+					.catch( error => res.status(400).json({ error })); 
 		})
-		.catch( error => res.status(400).json({ message: 'cas 3', error: error })); 
+		.catch( error => res.status(400).json({ message: 'Erreur du findOne()', error: error })); 
 }; 
