@@ -24,10 +24,6 @@ exports.createOneSauce = (req, res, next) => {
 		mainPepper:  sauceObject.mainPepper, 
 		imageUrl:  `${req.protocol}://${req.get('host')}/images/${req.file.filename}`, 
 		heat: sauceObject.heat,
-		likes: 0,
-		dislikes: 0,
-		usersLiked: [], 
-		usersDisliked: []
 	}); 
 	sauce.save()
 		.then((sauce) => res.status(201).json({ message: sauce}))
