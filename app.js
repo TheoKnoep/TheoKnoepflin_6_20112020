@@ -6,6 +6,12 @@ const path = require('path');
 const userRoutes = require('./routes/user'); 
 const saucesRoutes = require('./routes/sauces'); 
 
+
+const helmet = require('helmet'); 
+const session = require('express-session'); 
+
+
+
 mongoose.connect('mongodb+srv://first_user_4991:jzS5wAP001nDXO52@coursocgofullstack.3ppnx.mongodb.net/sopekocko?retryWrites=true&w=majority',
 	{ useNewUrlParser: true, useUnifiedTopology: true })
 			.then(() => console.log('Connexion à MongoDB réussie !'))
@@ -14,12 +20,24 @@ mongoose.connect('mongodb+srv://first_user_4991:jzS5wAP001nDXO52@coursocgofullst
 
 const app = express(); 
 
+app.use(helmet()); 
+
+
 app.use((req, res, next) => { //Déclaration des headers CORS 
 	res.setHeader('Access-Control-Allow-Origin', '*');
 	res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content, Accept, Content-Type, Authorization');
 	res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
 	next();
 });
+
+app.set('trust proxy', 1) // trust first proxy
+app.use(session({
+	secret: 'fripouille',
+	name: 'sessionId', 
+	cookie: {
+		httpOnly: true
+	}
+})); 
 
 
 app.use(bodyParser.json());
