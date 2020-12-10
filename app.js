@@ -8,7 +8,6 @@ const saucesRoutes = require('./routes/sauces');
 
 
 const helmet = require('helmet'); 
-const session = require('express-session'); 
 
 
 
@@ -30,14 +29,6 @@ app.use((req, res, next) => { //Déclaration des headers CORS
 	next();
 });
 
-app.set('trust proxy', 1) // trust first proxy
-app.use(session({
-	secret: 'fripouille',
-	name: 'sessionId', 
-	cookie: {
-		httpOnly: true
-	}
-})); 
 
 
 app.use(bodyParser.json());
