@@ -6,10 +6,8 @@ const path = require('path');
 const userRoutes = require('./routes/user'); 
 const saucesRoutes = require('./routes/sauces'); 
 
-
 const helmet = require('helmet'); 
-
-
+const mongoSanitize = require('express-mongo-sanitize'); 
 
 mongoose.connect('mongodb+srv://first_user_4991:jzS5wAP001nDXO52@coursocgofullstack.3ppnx.mongodb.net/sopekocko?retryWrites=true&w=majority',
 	{ useNewUrlParser: true, useUnifiedTopology: true })
@@ -21,7 +19,6 @@ const app = express();
 
 app.use(helmet()); 
 
-
 app.use((req, res, next) => { //Déclaration des headers CORS 
 	res.setHeader('Access-Control-Allow-Origin', '*');
 	res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content, Accept, Content-Type, Authorization');
@@ -30,8 +27,9 @@ app.use((req, res, next) => { //Déclaration des headers CORS
 });
 
 
-
+app.use(bodyParser.urlencoded({extended: true})); 
 app.use(bodyParser.json());
+app.use(mongoSanitize()); 
 
 app.use('/images', express.static(path.join(__dirname, 'images'))); 
 
