@@ -9,7 +9,9 @@ const saucesRoutes = require('./routes/sauces');
 const helmet = require('helmet'); 
 const mongoSanitize = require('express-mongo-sanitize'); 
 
-mongoose.connect('mongodb+srv://first_user_4991:jzS5wAP001nDXO52@coursocgofullstack.3ppnx.mongodb.net/sopekocko?retryWrites=true&w=majority',
+require('dotenv').config(); 
+
+mongoose.connect(`mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@coursocgofullstack.3ppnx.mongodb.net/sopekocko?retryWrites=true&w=majority`,
 	{ useNewUrlParser: true, useUnifiedTopology: true })
 			.then(() => console.log('Connexion à MongoDB réussie !'))
 			.catch(() => console.log('Connexion à MongoDB échouée !'));

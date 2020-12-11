@@ -5,19 +5,23 @@ const emailValidator = require('email-validator');
 const passwordValidator = require('password-validator'); 
 
 const schema = new passwordValidator(); 
-
 //Schéma de mot de passe : au moins 8 caractères, avec au moins 1 capitale et 1 chiffre :
 schema.is().min(8); 
 schema.has().uppercase(); 
 schema.has().digits(1); schema.is().not().oneOf(['Azert'])
 
+
+const cryptojs = require('crypto-js'); 
+
+
+
 exports.signup = (req, res, next) => {
-	console.log(schema.validate('invalidpassword')); 
+	const cryptedEmail = cryptojs.HmacSHA256(req.body.email, process.env.EMAIL_ENCRYPTION_KEY).toString(); 
 	if (emailValidator.validate(req.body.email) && schema.validate(req.body.password)) {
 		bcrypt.hash(req.body.password, 10)
 			.then(hash => {
 				const user = new User({
-					email: req.body.email, 
+					email: cryptedEmail, 
 					password: hash
 				}); 
 				user.save()
@@ -32,7 +36,8 @@ exports.signup = (req, res, next) => {
 }; 
 
 exports.login = (req, res, next) => {
-	User.findOne({ email: req.body.email })
+	const cryptedEmail = cryptojs.HmacSHA256(req.body.email, process.env.EMAIL_ENCRYPTION_KEY).toString(); 
+	User.findOne({ email: cryptedEmail})
 	.then(user => {
 	  if (!user) {
 	    return res.status(401).json({ error: "Utilisateur non trouvé" });
@@ -46,7 +51,7 @@ exports.login = (req, res, next) => {
 		userId: user._id,
 		token: jwt.sign(
 			{ userId: user._id }, 
-			'RANDOM_TOKEN_SECRET', 
+			process.env.TOKEN_SALT, 
 			{ expiresIn: '24h' }
 		)
 	      });
